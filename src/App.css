@@ -22,8 +22,11 @@
   font-size: large;
 }
 
-.tempData {
-  color: green;
+#zipInput {
+  width: auto;
+  margin-left: 605px;
+  margin-right: 500px;
+  margin-bottom: 20px;
 }
 
 @keyframes App-logo-spin {

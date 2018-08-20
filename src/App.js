@@ -6,6 +6,7 @@ class Results extends Component {
     constructor(props) {
     super(props);
         this.state = {
+            submitted: false,
             coord: {},
             sys: {},
             weather: {},
@@ -16,32 +17,18 @@ class Results extends Component {
             dt: 0,
             id: 0,
             name: "",
-            zipcode: "02459",
+            zipcode: "",
             countryCode: "US",
         };
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
     convertTemp(input) {
-        return 9/5 * (input - 273) + 32;
+        let temp = 9/5 * (input - 273) + 32;
+        return temp.toFixed(2);
     };
-    createView() {
-        return (
-            <div class="jumbotron">
-                <h1 class="display-4"> Welcome to Weather App! </h1>
-                <p class="lead"> This is a simple weather app personalized for Adam Qian </p>
-                <hr class="my-4"/>
-                <p> It is completely built off of React and is my pet project for experimenting with react </p>
-                <p> Current weather in Newton Massachusetts:</p>
-                <h4> <b> Temperature: {this.convertTemp(this.state.main.temp)}F</b></h4>
-                <h4> <b> Temperature range: {this.convertTemp(this.state.main.temp_min)}F - {this.convertTemp(this.state.main.temp_max)}F</b></h4>
-                <h4> <b> Humidity: {this.state.main.humidity}%</b></h4>
-                <h4> <b> Wind: Speed: {this.state.wind.speed * 0.621371} MPH  Direction: {this.state.wind.deg} degrees</b> </h4>
-                <h4> <b> Current Weather: {this.state.weather.description} </b></h4>
-            </div>
-        );
-    }
-    componentDidMount() {
+    handleSubmit(event) {
         const apiURL = `http://api.openweathermap.org/data/2.5/weather?zip=${this.state.zipcode},${this.state.countryCode}&APPID=${this.props.APPID}`;
-        console.log(apiURL);
         fetch(apiURL)
         .then(results => {
             if (!results.ok) throw Error(results.statusText);
@@ -61,11 +48,51 @@ class Results extends Component {
                 name: data.name,
             })
         });
+        this.setState({submitted: true});
+        event.preventDefault();
+    }
+    handleChange(event) {
+        this.setState({zipcode: event.target.value});
+    }
+    createView() {
+        if (!this.state.submitted) {
+            return(
+                <div class="jumbotron">
+                    <h1 class="display-4"> Weather App </h1>
+                    <p class="lead"> Please enter a 5 digit US zipcode for weather information </p>
+                    <form onSubmit={this.handleSubmit}>
+                        <div class="form-group">
+                            <input id="zipInput" class="form-control" type= "text" onChange={this.handleChange} placeholder="5-digit zipcode"/>
+                            <button class="btn btn-primary" type="submit"> Submit </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+        else {
+            return(
+                <div class="jumbotron">
+                    <h1 class="display-4"> Weather App </h1>
+                    <p class="lead"> Please enter a 5 digit US zipcode for weather information </p>
+                    <form onSubmit={this.handleSubmit}>
+                        <div class="form-group">
+                            <input id="zipInput" class="form-control" type= "text" onChange={this.handleChange} placeholder="5-digit zipcode"/>
+                            <button class="btn btn-primary" type="submit">Submit </button>
+                        </div>
+                    </form>
+                    <h2> <b> Current weather in {this.state.name}</b> </h2>
+                    <h4> <b> Temperature: {this.convertTemp(this.state.main.temp)}F</b></h4>
+                    <h4> <b> Temperature range: {this.convertTemp(this.state.main.temp_min)}F - {this.convertTemp(this.state.main.temp_max)}F</b></h4>
+                    <h4> <b> Humidity: {this.state.main.humidity}%</b></h4>
+                    <h4> <b> Wind: Speed: {(this.state.wind.speed * 0.621371).toFixed(2)} MPH  Direction: {this.state.wind.deg} degrees</b> </h4>
+                    <h4> <b> Current Weather: {this.state.weather.description} </b></h4> 
+                </div>
+            );
+        }    
     }
     render() {
     return(
         <div className="Results">
-            <p> This is the results section </p>
             {this.createView()}
         </div>
     );
@@ -80,11 +107,8 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">React Project</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
         {this.renderResults('8594ec7c3495644ac0871f8cad7717d6')}
       </div>
     );
